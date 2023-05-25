@@ -326,7 +326,7 @@ module InsideTranspMod
   real(r8) :: VOLWHS,VOLWT
 
   integer :: IFLGB,N,L,K,LL
-  integer :: N1,N2,N3,N4,N5,N6
+  integer :: N1,N2,N3,N4,N5,N6,N6B
 
 ! begin_execution
 !     N3,N2,N1=L,NY,NX of source grid cell
@@ -365,13 +365,14 @@ module InsideTranspMod
           N5=NY
           N6=L+1
         ENDIF
-      ENDIF
-      DO LL=N6,NL(NY,NX)
+     ENDIF
+     N6B = N6
+     DO LL=N6,NL(NY,NX)
         IF(VOLX(LL,N5,N4).GT.ZEROS2(N5,N4))THEN
-          N6=LL
-          exit
+           N6=LL
+           exit
         ENDIF
-      ENDDO
+     ENDDO
 !
 !     SOLUTE FLUXES BETWEEN ADJACENT GRID CELLS FROM
 !     WATER CONTENTS AND WATER FLUXES 'FLQM' FROM 'WATSUB'
@@ -408,7 +409,7 @@ module InsideTranspMod
 !
             FLQM(N,N6,N5,N4)=(FLWM(M,N,N6,N5,N4)+FLWHM(M,N,N6,N5,N4))*XNPT
 !
-            call SoluteAdvDifTransport(M,N,N1,N2,N3,N4,N5,N6)
+            call SoluteAdvDifTransport(M,N,N1,N2,N3,N4,N5,N6,N6B)
 
 !
 !     MACROPORE-MICROPORE SOLUTE EXCHANGE WITHIN SOIL
@@ -1074,9 +1075,9 @@ module InsideTranspMod
   end subroutine SoluteDifTranspMacropore
 
 ! ----------------------------------------------------------------------
-  subroutine SoluteAdvDifTransport(M,N,N1,N2,N3,N4,N5,N6)
+  subroutine SoluteAdvDifTransport(M,N,N1,N2,N3,N4,N5,N6,N6B)
   implicit none
-  integer, intent(in) :: M,N,N1,N2,N3,N4,N5,N6
+  integer, intent(in) :: M,N,N1,N2,N3,N4,N5,N6,N6B
 
   real(r8) :: THETW1(JZ,JY,JX)
   integer :: K,NTS
@@ -1117,14 +1118,14 @@ module InsideTranspMod
 !     DFH*=diffusive solute flux through macropores
 !
   D9765: DO K=1,jcplx
-    ROCFLS(K,N,N6,N5,N4)=RFLOC(K)+DFVOC(K)
-    RONFLS(K,N,N6,N5,N4)=RFLON(K)+DFVON(K)
-    ROPFLS(K,N,N6,N5,N4)=RFLOP(K)+DFVOP(K)
-    ROAFLS(K,N,N6,N5,N4)=RFLOA(K)+DFVOA(K)
-    ROCFHS(K,N,N6,N5,N4)=RFHOC(K)+DFHOC(K)
-    RONFHS(K,N,N6,N5,N4)=RFHON(K)+DFHON(K)
-    ROPFHS(K,N,N6,N5,N4)=RFHOP(K)+DFHOP(K)
-    ROAFHS(K,N,N6,N5,N4)=RFHOA(K)+DFHOA(K)
+    ROCFLS(K,N,N6B,N5,N4)=RFLOC(K)+DFVOC(K)
+    RONFLS(K,N,N6B,N5,N4)=RFLON(K)+DFVON(K)
+    ROPFLS(K,N,N6B,N5,N4)=RFLOP(K)+DFVOP(K)
+    ROAFLS(K,N,N6B,N5,N4)=RFLOA(K)+DFVOA(K)
+    ROCFHS(K,N,N6B,N5,N4)=RFHOC(K)+DFHOC(K)
+    RONFHS(K,N,N6B,N5,N4)=RFHON(K)+DFHON(K)
+    ROPFHS(K,N,N6B,N5,N4)=RFHOP(K)+DFHOP(K)
+    ROAFHS(K,N,N6B,N5,N4)=RFHOA(K)+DFHOA(K)
   ENDDO D9765
 
 !
@@ -1140,19 +1141,19 @@ module InsideTranspMod
 !     R*FHW,X*FHB=convective + diffusive solute flux through macropores in non-band,band
 !
   D9755: DO K=1,jcplx
-    XOCFLS(K,N,N6,N5,N4)=XOCFLS(K,N,N6,N5,N4)+ROCFLS(K,N,N6,N5,N4)
-    XONFLS(K,N,N6,N5,N4)=XONFLS(K,N,N6,N5,N4)+RONFLS(K,N,N6,N5,N4)
-    XOPFLS(K,N,N6,N5,N4)=XOPFLS(K,N,N6,N5,N4)+ROPFLS(K,N,N6,N5,N4)
-    XOAFLS(K,N,N6,N5,N4)=XOAFLS(K,N,N6,N5,N4)+ROAFLS(K,N,N6,N5,N4)
-    XOCFHS(K,N,N6,N5,N4)=XOCFHS(K,N,N6,N5,N4)+ROCFHS(K,N,N6,N5,N4)
-    XONFHS(K,N,N6,N5,N4)=XONFHS(K,N,N6,N5,N4)+RONFHS(K,N,N6,N5,N4)
-    XOPFHS(K,N,N6,N5,N4)=XOPFHS(K,N,N6,N5,N4)+ROPFHS(K,N,N6,N5,N4)
-    XOAFHS(K,N,N6,N5,N4)=XOAFHS(K,N,N6,N5,N4)+ROAFHS(K,N,N6,N5,N4)
+    XOCFLS(K,N,N6B,N5,N4)=XOCFLS(K,N,N6B,N5,N4)+ROCFLS(K,N,N6B,N5,N4)
+    XONFLS(K,N,N6B,N5,N4)=XONFLS(K,N,N6B,N5,N4)+RONFLS(K,N,N6B,N5,N4)
+    XOPFLS(K,N,N6B,N5,N4)=XOPFLS(K,N,N6B,N5,N4)+ROPFLS(K,N,N6B,N5,N4)
+    XOAFLS(K,N,N6B,N5,N4)=XOAFLS(K,N,N6B,N5,N4)+ROAFLS(K,N,N6B,N5,N4)
+    XOCFHS(K,N,N6B,N5,N4)=XOCFHS(K,N,N6B,N5,N4)+ROCFHS(K,N,N6B,N5,N4)
+    XONFHS(K,N,N6B,N5,N4)=XONFHS(K,N,N6B,N5,N4)+RONFHS(K,N,N6B,N5,N4)
+    XOPFHS(K,N,N6B,N5,N4)=XOPFHS(K,N,N6B,N5,N4)+ROPFHS(K,N,N6B,N5,N4)
+    XOAFHS(K,N,N6B,N5,N4)=XOAFHS(K,N,N6B,N5,N4)+ROAFHS(K,N,N6B,N5,N4)
   ENDDO D9755
 
   DO NTS=ids_beg,ids_end
-    trcs_XFLS(NTS,N,N6,N5,N4)=trcs_XFLS(NTS,N,N6,N5,N4)+R3PoreSolFlx(NTS,N,N6,N5,N4)
-    trcs_XFHS(NTS,N,N6,N5,N4)=trcs_XFHS(NTS,N,N6,N5,N4)+R3PoreSoHFlx(NTS,N,N6,N5,N4)
+    trcs_XFLS(NTS,N,N6B,N5,N4)=trcs_XFLS(NTS,N,N6B,N5,N4)+R3PoreSolFlx(NTS,N,N6B,N5,N4)
+    trcs_XFHS(NTS,N,N6B,N5,N4)=trcs_XFHS(NTS,N,N6B,N5,N4)+R3PoreSoHFlx(NTS,N,N6B,N5,N4)
   ENDDO
 
   end subroutine SoluteAdvDifTransport

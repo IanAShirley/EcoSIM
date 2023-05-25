@@ -667,47 +667,49 @@ module BoundaryTranspMod
 
   integer, intent(in) :: NY,NX,N,M,N1,N2,N3,N4,N5,MX
   integer, intent(inout) :: N6
-  integer :: K,LL,NTS,NTG
+  integer :: K,LL,NTS,NTG,N3A,N3B
 
-  DO LL=N6,NL(NY,NX)
+  N3A = N3
+  N3B = N3
+  DO LL=N3,NL(NY,NX)
     IF(VOLX(LL,N2,N1).GT.ZEROS2(N2,N1))THEN
-      N6=LL
+      N3A=LL
       exit
     ENDIF
   ENDDO
 
   IF(M.NE.MX)THEN
-    IF(VOLX(N3,N2,N1).GT.ZEROS2(N2,N1))THEN
+    IF(VOLX(N3A,N2,N1).GT.ZEROS2(N2,N1))THEN
       DO  K=1,jcplx
-        TOCFLS(K,N3,N2,N1)=TOCFLS(K,N3,N2,N1)+ROCFLS(K,N,N3,N2,N1)-ROCFLS(K,N,N6,N5,N4)
-        TONFLS(K,N3,N2,N1)=TONFLS(K,N3,N2,N1)+RONFLS(K,N,N3,N2,N1)-RONFLS(K,N,N6,N5,N4)
-        TOPFLS(K,N3,N2,N1)=TOPFLS(K,N3,N2,N1)+ROPFLS(K,N,N3,N2,N1)-ROPFLS(K,N,N6,N5,N4)
-        TOAFLS(K,N3,N2,N1)=TOAFLS(K,N3,N2,N1)+ROAFLS(K,N,N3,N2,N1)-ROAFLS(K,N,N6,N5,N4)
-        TOCFHS(K,N3,N2,N1)=TOCFHS(K,N3,N2,N1)+ROCFHS(K,N,N3,N2,N1)-ROCFHS(K,N,N6,N5,N4)
-        TONFHS(K,N3,N2,N1)=TONFHS(K,N3,N2,N1)+RONFHS(K,N,N3,N2,N1)-RONFHS(K,N,N6,N5,N4)
-        TOPFHS(K,N3,N2,N1)=TOPFHS(K,N3,N2,N1)+ROPFHS(K,N,N3,N2,N1)-ROPFHS(K,N,N6,N5,N4)
-        TOAFHS(K,N3,N2,N1)=TOAFHS(K,N3,N2,N1)+ROAFHS(K,N,N3,N2,N1)-ROAFHS(K,N,N6,N5,N4)
+        TOCFLS(K,N3A,N2,N1)=TOCFLS(K,N3A,N2,N1)+ROCFLS(K,N,N3B,N2,N1)-ROCFLS(K,N,N6,N5,N4)
+        TONFLS(K,N3A,N2,N1)=TONFLS(K,N3A,N2,N1)+RONFLS(K,N,N3B,N2,N1)-RONFLS(K,N,N6,N5,N4)
+        TOPFLS(K,N3A,N2,N1)=TOPFLS(K,N3A,N2,N1)+ROPFLS(K,N,N3B,N2,N1)-ROPFLS(K,N,N6,N5,N4)
+        TOAFLS(K,N3A,N2,N1)=TOAFLS(K,N3A,N2,N1)+ROAFLS(K,N,N3B,N2,N1)-ROAFLS(K,N,N6,N5,N4)
+        TOCFHS(K,N3A,N2,N1)=TOCFHS(K,N3A,N2,N1)+ROCFHS(K,N,N3B,N2,N1)-ROCFHS(K,N,N6,N5,N4)
+        TONFHS(K,N3A,N2,N1)=TONFHS(K,N3A,N2,N1)+RONFHS(K,N,N3B,N2,N1)-RONFHS(K,N,N6,N5,N4)
+        TOPFHS(K,N3A,N2,N1)=TOPFHS(K,N3A,N2,N1)+ROPFHS(K,N,N3B,N2,N1)-ROPFHS(K,N,N6,N5,N4)
+        TOAFHS(K,N3A,N2,N1)=TOAFHS(K,N3A,N2,N1)+ROAFHS(K,N,N3B,N2,N1)-ROAFHS(K,N,N6,N5,N4)
       enddo
       DO NTS=ids_beg,ids_end
-        R3PorTSolFlx(NTS,N3,N2,N1)=R3PorTSolFlx(NTS,N3,N2,N1) &
-          +R3PoreSolFlx(NTS,N,N3,N2,N1)-R3PoreSolFlx(NTS,N,N6,N5,N4)
-        R3PorTSoHFlx(NTS,N3,N2,N1)=R3PorTSoHFlx(NTS,N3,N2,N1) &
-          +R3PoreSoHFlx(NTS,N,N3,N2,N1)-R3PoreSoHFlx(NTS,N,N6,N5,N4)
+        R3PorTSolFlx(NTS,N3A,N2,N1)=R3PorTSolFlx(NTS,N3A,N2,N1) &
+          +R3PoreSolFlx(NTS,N,N3B,N2,N1)-R3PoreSolFlx(NTS,N,N6,N5,N4)
+        R3PorTSoHFlx(NTS,N3A,N2,N1)=R3PorTSoHFlx(NTS,N3A,N2,N1) &
+          +R3PoreSoHFlx(NTS,N,N3B,N2,N1)-R3PoreSoHFlx(NTS,N,N6,N5,N4)
       ENDDO
 
     ELSE
       DO  K=1,jcplx
-        TOCFLS(K,N3,N2,N1)=0.0_r8
-        TONFLS(K,N3,N2,N1)=0.0_r8
-        TOPFLS(K,N3,N2,N1)=0.0_r8
-        TOAFLS(K,N3,N2,N1)=0.0_r8
-        TOCFHS(K,N3,N2,N1)=0.0_r8
-        TONFHS(K,N3,N2,N1)=0.0_r8
-        TOPFHS(K,N3,N2,N1)=0.0_r8
-        TOAFHS(K,N3,N2,N1)=0.0_r8
+        TOCFLS(K,N3A,N2,N1)=0.0_r8
+        TONFLS(K,N3A,N2,N1)=0.0_r8
+        TOPFLS(K,N3A,N2,N1)=0.0_r8
+        TOAFLS(K,N3A,N2,N1)=0.0_r8
+        TOCFHS(K,N3A,N2,N1)=0.0_r8
+        TONFHS(K,N3A,N2,N1)=0.0_r8
+        TOPFHS(K,N3A,N2,N1)=0.0_r8
+        TOAFHS(K,N3A,N2,N1)=0.0_r8
       enddo
-      R3PorTSolFlx(ids_beg:ids_end,N3,N2,N1)=0.0_r8
-      R3PorTSoHFlx(ids_beg:ids_end,N3,N2,N1)=0._r8
+      R3PorTSolFlx(ids_beg:ids_end,N3A,N2,N1)=0.0_r8
+      R3PorTSoHFlx(ids_beg:ids_end,N3A,N2,N1)=0._r8
 
     ENDIF
   ENDIF
@@ -718,13 +720,13 @@ module BoundaryTranspMod
 !     R*FLG=convective+diffusive gas flux
 !     gas code:*CO*=CO2,*OX*=O2,*CH*=CH4,*NG*=N2,*N2*=N2O,*NH*=NH3,*HG*=H2
 !
-  IF(VOLX(N3,N2,N1).GT.ZEROS2(N2,N1))THEN
+  IF(VOLX(N3A,N2,N1).GT.ZEROS2(N2,N1))THEN
     DO NTG=idg_beg,idg_end-1
-      RTGasADFlx(NTG,N3,N2,N1)=RTGasADFlx(NTG,N3,N2,N1) &
-        +R3GasADFlx(NTG,N,N3,N2,N1)-R3GasADFlx(NTG,N,N6,N5,N4)
+      RTGasADFlx(NTG,N3A,N2,N1)=RTGasADFlx(NTG,N3A,N2,N1) &
+        +R3GasADFlx(NTG,N,N3B,N2,N1)-R3GasADFlx(NTG,N,N6,N5,N4)
     ENDDO
   ELSE
-    RTGasADFlx(idg_beg:idg_end-1,N3,N2,N1)=0._r8
+    RTGasADFlx(idg_beg:idg_end-1,N3A,N2,N1)=0._r8
   ENDIF
   end subroutine NetFluxMicroandMacropores
 

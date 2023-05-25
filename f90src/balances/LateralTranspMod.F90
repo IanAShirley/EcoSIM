@@ -836,9 +836,8 @@ implicit none
 
   subroutine FluxBetweenGrids(N,N1,N2,N3,N4,N5,N6,NY,NX)
   implicit none
-  integer, intent(in) :: N,N1,N2,N3,N4,N5,NY,NX
-  integer, intent(inout) :: N6
-  integer :: LL,K,NTSA,NTS,NTG
+  integer, intent(in) :: N,N1,N2,N3,N4,N5,N6,NY,NX
+  integer :: LL,K,NTSA,NTS,NTG,N3A,N3B
   !     begin_execution
   !     NET HEAT, WATER FLUXES BETWEEN ADJACENT
   !     GRID CELLS
@@ -847,42 +846,48 @@ implicit none
   !     FLW,FLWH,HFLW=micropore,macropore water flux, heat flux from watsub.f
   !     FLWNU,FLWHNU,HFLWNU=lake surface water flux, heat flux from watsub.f if lake surface disappears
   !
+  N3A = N3
+  N3B = N3
   IF(NCN(N2,N1).NE.3.OR.N.EQ.3)THEN
-    D1200: DO LL=N6,NL(N5,N4)
+    D1200: DO LL=N3,NL(N5,N4)
       IF(VOLX(LL,N2,N1).GT.ZEROS2(N2,N1))THEN
-        N6=LL
+        N3A=LL
         exit
       ENDIF
     ENDDO D1200
-    IF(VOLX(N3,N2,N1).GT.ZEROS2(N2,N1))THEN
+    IF(VOLX(N3A,N2,N1).GT.ZEROS2(N2,N1))THEN
       IF(N3.EQ.NU(N2,N1).AND.N.EQ.3)THEN
-        TFLW(N3,N2,N1)=TFLW(N3,N2,N1)+FLW(N,N3,N2,N1)-FLWNU(N5,N4)
-        TFLWX(N3,N2,N1)=TFLWX(N3,N2,N1)+FLWX(N,N3,N2,N1)-FLWXNU(N5,N4)
-        TFLWH(N3,N2,N1)=TFLWH(N3,N2,N1)+FLWH(N,N3,N2,N1)-FLWHNU(N5,N4)
-        THFLW(N3,N2,N1)=THFLW(N3,N2,N1)+HFLW(N,N3,N2,N1)-HFLWNU(N5,N4)
-        if(THFLW(N3,N2,N1)<-1.e10)then
-          write(*,*)'THFLW(N3,N2,N1)+HFLW(N,N3,N2,N1)-HFLWNU(N5,N4)',&
-            THFLW(N3,N2,N1),HFLW(N,N3,N2,N1),HFLWNU(N5,N4)
+        TFLW(N3A,N2,N1)=TFLW(N3A,N2,N1)+FLW(N,N3B,N2,N1)-FLWNU(N5,N4)
+        TFLWX(N3A,N2,N1)=TFLWX(N3A,N2,N1)+FLWX(N,N3B,N2,N1)-FLWXNU(N5,N4)
+        TFLWH(N3A,N2,N1)=TFLWH(N3A,N2,N1)+FLWH(N,N3B,N2,N1)-FLWHNU(N5,N4)
+        THFLW(N3A,N2,N1)=THFLW(N3A,N2,N1)+HFLW(N,N3B,N2,N1)-HFLWNU(N5,N4)
+        if(THFLW(N3A,N2,N1)<-1.e10)then
+          write(*,*)'THFLW(N3A,N2,N1)+HFLW(N,N3A,N2,N1)-HFLWNU(N5,N4)',&
+            THFLW(N3A,N2,N1),HFLW(N,N3A,N2,N1),HFLWNU(N5,N4)
           write(*,*)'Ns=',N1,n2,n3,n4,n5
           call endrun(trim(mod_filename)//' at line',__LINE__)
         endif
       ELSE
-        TFLW(N3,N2,N1)=TFLW(N3,N2,N1)+FLW(N,N3,N2,N1)-FLW(N,N6,N5,N4)
-        TFLWX(N3,N2,N1)=TFLWX(N3,N2,N1)+FLWX(N,N3,N2,N1)-FLWX(N,N6,N5,N4)
-        TFLWH(N3,N2,N1)=TFLWH(N3,N2,N1)+FLWH(N,N3,N2,N1)-FLWH(N,N6,N5,N4)
-        THFLW(N3,N2,N1)=THFLW(N3,N2,N1)+HFLW(N,N3,N2,N1)-HFLW(N,N6,N5,N4)
-        if(THFLW(N3,N2,N1)<-1.e10)then
-          write(*,*)'THFLW(N3,N2,N1)+HFLW(N,N3,N2,N1)-HFLW(N,N6,N5,N4)',&
-            THFLW(N3,N2,N1),HFLW(N,N3,N2,N1),HFLW(N,N6,N5,N4)
+        TFLW(N3A,N2,N1)=TFLW(N3A,N2,N1)+FLW(N,N3B,N2,N1)-FLW(N,N6,N5,N4)
+        if (N3A.NE.N3B) then
+           write(*,*) N1,N3A,N3B, TFLW(N3A,N2,N1),FLW(N,N3B,N2,N1),FLW(N,N6,N5,N4)
+        endif
+          
+        TFLWX(N3A,N2,N1)=TFLWX(N3A,N2,N1)+FLWX(N,N3B,N2,N1)-FLWX(N,N6,N5,N4)
+        TFLWH(N3A,N2,N1)=TFLWH(N3A,N2,N1)+FLWH(N,N3B,N2,N1)-FLWH(N,N6,N5,N4)
+        THFLW(N3A,N2,N1)=THFLW(N3A,N2,N1)+HFLW(N,N3B,N2,N1)-HFLW(N,N6,N5,N4)
+        if(THFLW(N3A,N2,N1)<-1.e10)then
+          write(*,*)'THFLW(N3A,N2,N1)+HFLW(N,N3A,N2,N1)-HFLW(N,N6,N5,N4)',&
+            THFLW(N3A,N2,N1),HFLW(N,N3A,N2,N1),HFLW(N,N6,N5,N4)
           write(*,*)'Ns=',N,N1,n2,n3,n4,n5,n6
           call endrun(trim(mod_filename)//' at line',__LINE__)
         endif
       ENDIF
       !     IF(N1.EQ.1.AND.N3.EQ.1)THEN
-      !     WRITE(*,6632)'TFLW',I,J,N,N1,N2,N3,N4,N5,N6,NU(N2,N1)
-      !    2,TFLW(N3,N2,N1),FLW(N,N3,N2,N1),FLW(N,N6,N5,N4),FLWNU(N5,N4)
-      !    3,THFLW(N3,N2,N1),HFLW(N,N3,N2,N1),HFLW(N,N6,N5,N4)
-      !    2,HFLWNU(N5,N4),VOLW(N3,N2,N1)
+      !     WRITE(*,6632)'TFLW',I,J,N,N1,N2,N3A,N4,N5,N6,NU(N2,N1)
+      !    2,TFLW(N3A,N2,N1),FLW(N,N3A,N2,N1),FLW(N,N6,N5,N4),FLWNU(N5,N4)
+      !    3,THFLW(N3A,N2,N1),HFLW(N,N3A,N2,N1),HFLW(N,N6,N5,N4)
+      !    2,HFLWNU(N5,N4),VOLW(N3A,N2,N1)
 !6632  FORMAT(A8,10I4,12E16.8)
       !     ENDIF
       !
@@ -896,21 +901,21 @@ implicit none
       !             :N4B=NH4,N3B=NH3,NOB=NO3,N2B=NO2,P1B=HPO4,POB=H2PO4 in band
       !
       D8585: DO K=1,jcplx
-        TOCFLS(K,N3,N2,N1)=TOCFLS(K,N3,N2,N1)+XOCFLS(K,N,N3,N2,N1)-XOCFLS(K,N,N6,N5,N4)
-        TONFLS(K,N3,N2,N1)=TONFLS(K,N3,N2,N1)+XONFLS(K,N,N3,N2,N1)-XONFLS(K,N,N6,N5,N4)
-        TOPFLS(K,N3,N2,N1)=TOPFLS(K,N3,N2,N1)+XOPFLS(K,N,N3,N2,N1)-XOPFLS(K,N,N6,N5,N4)
-        TOAFLS(K,N3,N2,N1)=TOAFLS(K,N3,N2,N1)+XOAFLS(K,N,N3,N2,N1)-XOAFLS(K,N,N6,N5,N4)
-        TOCFHS(K,N3,N2,N1)=TOCFHS(K,N3,N2,N1)+XOCFHS(K,N,N3,N2,N1)-XOCFHS(K,N,N6,N5,N4)
-        TONFHS(K,N3,N2,N1)=TONFHS(K,N3,N2,N1)+XONFHS(K,N,N3,N2,N1)-XONFHS(K,N,N6,N5,N4)
-        TOPFHS(K,N3,N2,N1)=TOPFHS(K,N3,N2,N1)+XOPFHS(K,N,N3,N2,N1)-XOPFHS(K,N,N6,N5,N4)
-        TOAFHS(K,N3,N2,N1)=TOAFHS(K,N3,N2,N1)+XOAFHS(K,N,N3,N2,N1)-XOAFHS(K,N,N6,N5,N4)
+        TOCFLS(K,N3A,N2,N1)=TOCFLS(K,N3A,N2,N1)+XOCFLS(K,N,N3B,N2,N1)-XOCFLS(K,N,N6,N5,N4)
+        TONFLS(K,N3A,N2,N1)=TONFLS(K,N3A,N2,N1)+XONFLS(K,N,N3B,N2,N1)-XONFLS(K,N,N6,N5,N4)
+        TOPFLS(K,N3A,N2,N1)=TOPFLS(K,N3A,N2,N1)+XOPFLS(K,N,N3B,N2,N1)-XOPFLS(K,N,N6,N5,N4)
+        TOAFLS(K,N3A,N2,N1)=TOAFLS(K,N3A,N2,N1)+XOAFLS(K,N,N3B,N2,N1)-XOAFLS(K,N,N6,N5,N4)
+        TOCFHS(K,N3A,N2,N1)=TOCFHS(K,N3A,N2,N1)+XOCFHS(K,N,N3B,N2,N1)-XOCFHS(K,N,N6,N5,N4)
+        TONFHS(K,N3A,N2,N1)=TONFHS(K,N3A,N2,N1)+XONFHS(K,N,N3B,N2,N1)-XONFHS(K,N,N6,N5,N4)
+        TOPFHS(K,N3A,N2,N1)=TOPFHS(K,N3A,N2,N1)+XOPFHS(K,N,N3B,N2,N1)-XOPFHS(K,N,N6,N5,N4)
+        TOAFHS(K,N3A,N2,N1)=TOAFHS(K,N3A,N2,N1)+XOAFHS(K,N,N3B,N2,N1)-XOAFHS(K,N,N6,N5,N4)
       ENDDO D8585
 
       DO NTS=ids_beg,ids_end
-        trcs_TFLS(NTS,N3,N2,N1)=trcs_TFLS(NTS,N3,N2,N1) &
-          +trcs_XFLS(NTS,N,N3,N2,N1)-trcs_XFLS(NTS,N,N6,N5,N4)
-        trcs_TFHS(NTS,N3,N2,N1)=trcs_TFHS(NTS,N3,N2,N1) &
-          +trcs_XFHS(NTS,N,N3,N2,N1)-trcs_XFHS(NTS,N,N6,N5,N4)
+        trcs_TFLS(NTS,N3A,N2,N1)=trcs_TFLS(NTS,N3A,N2,N1) &
+          +trcs_XFLS(NTS,N,N3B,N2,N1)-trcs_XFLS(NTS,N,N6,N5,N4)
+        trcs_TFHS(NTS,N3A,N2,N1)=trcs_TFHS(NTS,N3A,N2,N1) &
+          +trcs_XFHS(NTS,N,N3B,N2,N1)-trcs_XFHS(NTS,N,N6,N5,N4)
       ENDDO
 !
       !     NET GAS FLUXES BETWEEN ADJACENT GRID CELLS
@@ -920,7 +925,7 @@ implicit none
       !     gas code:*CO*=CO2,*OX*=O2,*CH*=CH4,*NG*=N2,*N2*=N2O,*NH*=NH3,*HG*=H2
 !exclude NH3B
       DO NTG=idg_beg,idg_end-1
-        RTGasADFlx(NTG,N3,N2,N1)=RTGasADFlx(NTG,N3,N2,N1)+R3GasADTFlx(NTG,N,N3,N2,N1)-R3GasADTFlx(NTG,N,N6,N5,N4)
+        RTGasADFlx(NTG,N3A,N2,N1)=RTGasADFlx(NTG,N3A,N2,N1)+R3GasADTFlx(NTG,N,N3B,N2,N1)-R3GasADTFlx(NTG,N,N6,N5,N4)
       ENDDO
 !
       !     NET SALT FLUXES BETWEEN ADJACENT GRID CELLS
@@ -940,10 +945,10 @@ implicit none
 !
       IF(salt_model)THEN
         DO NTSA=idsa_beg,idsab_end
-          trcsa_TFLS(NTSA,N3,N2,N1)=trcsa_TFLS(NTSA,N3,N2,N1) &
-            +trcsa_XFLS(NTSA,N,N3,N2,N1)-trcsa_XFLS(NTSA,N,N6,N5,N4)
-          trcsa_TFHS(NTSA,N3,N2,N1)=trcsa_TFHS(NTSA,N3,N2,N1) &
-            +trcsa_XFHS(NTSA,N,N3,N2,N1)-trcsa_XFHS(NTSA,N,N6,N5,N4)
+          trcsa_TFLS(NTSA,N3A,N2,N1)=trcsa_TFLS(NTSA,N3A,N2,N1) &
+            +trcsa_XFLS(NTSA,N,N3B,N2,N1)-trcsa_XFLS(NTSA,N,N6,N5,N4)
+          trcsa_TFHS(NTSA,N3A,N2,N1)=trcsa_TFHS(NTSA,N3A,N2,N1) &
+            +trcsa_XFHS(NTSA,N,N3B,N2,N1)-trcsa_XFHS(NTSA,N,N6,N5,N4)
         ENDDO
       ENDIF
     ELSE
